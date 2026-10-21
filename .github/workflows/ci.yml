@@ -23,4 +23,4 @@ jobs:
           cache: maven
 
       - name: Run Maven tests
-        run: bash mvnw -B clean verify
+        run: bash ./mvnw -B clean verify
