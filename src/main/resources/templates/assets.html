@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="~{layouts/master :: headelement}">
+</head>
+<body class="sb-nav-fixed">
+<nav th:replace="~{layouts/master :: navelement}"></nav>
+
+<div id="layoutSidenav">
+  <div th:replace="~{layouts/master :: sidebarelement}"></div>
+  <div id="layoutSidenav_content">
+    <main>
+      <div class="container-fluid px-4">
+        <h1 class="mt-4">Assets</h1>
+        <ol class="breadcrumb mb-4">
+			<li class="breadcrumb-item"><a href="/assets/add">Creat New Asset</a></li>
+          <li class="breadcrumb-item active">Asset Listing</li>
+        </ol>
+
+
+
+        <!-- Assets table -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Assets
+          </div>
+          <div class="card-body">
+            <!-- Filter Form -->
+            <div th:if="${successMessage}" class="alert alert-success">
+              <span th:text="${successMessage}"></span>
+            </div>
+            <form th:action="@{/assets}" method="get" class="row g-3 mb-4">
+              <div class="col-md-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" name="name" th:value="${name}">
+              </div>
+
+
+
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a th:href="@{/assets}" class="btn btn-secondary">Reset</a>
+				<a th:href="@{/jasperpdf/asset/export}" class="btn btn-danger btn-sm">PDF</a>
+				<a th:href="@{/assetexcel}" class="btn btn-primary">EXCEL</a>
+              </div>
+            </form>
+
+            <table class="table table-bordered" id="datatablesSimple">
+              <thead>
+              <tr>
+				
+				<th>ID</th>
+                <th>Name</th>
+				<th>Unit</th>
+				<th>Price</th>
+				<th>Quantity</th>
+				<th>Date</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              <!-- Check if there are categories -->
+              <tr th:if="${#lists.isEmpty(assets.content)}">
+                <td colspan="2" class="text-center">No Assets found</td>
+              </tr>
+
+
+              <tr th:each="asset : ${ assets.content}">
+				<td th:text="${asset.id}">1</td>
+				<td th:text="${asset.name}">2</td>
+				<td th:text="${asset.unit}">3</td>
+				<td th:text="${asset.prce}">4</td>
+				<td th:text="${asset.qtyy}">5</td>
+				<td th:text="${asset.date}">6</td>
+				
+
+                <td>
+					
+                  <a th:href="@{'/assets/edit/' + ${asset.id}}" class="btn btn-warning btn-sm">Edit</a>
+                  <a th:href="@{'/asset/delete/' + ${asset.id}}" class="btn btn-danger btn-sm"
+                     onclick="return confirm('Are you sure you want to delete this asset?');">Delete</a>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <!-- Previous Button -->
+            <li class="page-item" th:classappend="${assets.first} ? 'disabled'">
+              <a class="page-link" th:href="@{'/assets?page=' + (${assets.number - 1}) + '&size=' + ${assets.size}}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+
+            <!-- Page Number Buttons -->
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, assets.totalPages - 1)}"
+                th:classappend="${i == assets.number} ? 'active'">
+              <a class="page-link" th:href="@{'/assets?page=' + ${i} + '&size=' + ${assets.size}}" th:text="${i + 1}">1</a>
+            </li>
+
+            <!-- Next Button -->
+            <li class="page-item" th:classappend="${assets.last} ? 'disabled'">
+              <a class="page-link" th:href="@{'/assets?page=' + (${assets.number + 1}) + '&size=' + ${assets.size}}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+
+      </div>
+    </main>
+    <footer th:replace="~{layouts/master :: footerelement}"></footer>
+
+
+    <!-- Transaction Details Modal -->
+    <div class="modal fade" id="assetModal" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="assetModalLabel">Asset Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>ID:</strong> <span id="assetId"></span></p>
+            <p><strong>Name:</strong> <span id="assetName"></span></p>
+            <p><strong>Unit:</strong> <span id="assetUnit"></span></p>
+            <p><strong>Price:</strong> <span id="assetPrice"></span></p>
+			<p><strong>Quantity:</strong> <span id="assetQuantity"></span></p>
+			<p><strong>Date:</strong> <span id="assetDate"></span></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+   // Event handler for the "View" button
+   $('.view-asset').on('click', function () {
+     // Get the asset ID from the data-id attribute
+     var assetId = $(this).data('id');
+
+     // Perform AJAX request to fetch asset details
+     $.ajax({
+       url: '/assets/view/' + assetId, // URL with the correct ID
+       method: 'GET',
+       success: function (data) {
+         // Populate modal fields with transaction data
+         $('#assetId').text(data.id);
+         $('#assetName').text(data.name);
+         $('#assetUnit').text(data.unit);
+         $('#assetPrice').text(data.price);
+		 $('#assetQuantity').text(data.qty);
+		 $('#assetDate').text(data.date);
+
+         // Show the modal
+         $('#assetModal').modal('show');
+       },
+       error: function () {
+         console.error('Error fetching asset details');
+       }
+     });
+   });
+ });
+
+</script>
+
+
+</body>
+</html>
+
+

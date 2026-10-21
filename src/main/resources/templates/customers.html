@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="~{layouts/master :: headelement}">
+
+</head>
+<body class="sb-nav-fixed">
+<nav  th:replace="~{layouts/master :: navelement}">
+
+</nav>
+<div id="layoutSidenav">
+  <div  th:replace="~{layouts/master :: sidebarelement}">
+
+  </div>
+  <div id="layoutSidenav_content">
+    <main>
+      <div class="container-fluid px-4">
+        <h1 class="mt-4">Customers</h1>
+        <ol class="breadcrumb mb-4">
+          <li class="breadcrumb-item"><a href="/customers/add">Create New Customer</a></li>
+          <li class="breadcrumb-item active">Customers List</li>
+        </ol>
+        <div class="card mb-4">
+          <div class="card-body">
+            <div th:if="${successMessage}" class="alert alert-success">
+              <span th:text="${successMessage}"></span>
+            </div>
+            <form th:action="@{/customers}" method="get" class="row g-3 mb-4">
+				
+              <div class="col-md-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" name="name" th:value="${name}">
+              </div>
+			  
+			  
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a th:href="@{/customers}" class="btn btn-secondary">Reset</a>
+				<a th:href="@{/jasperpdf/export}" class="btn btn-danger btn-sm">PDF</a>
+				<a th:href="@{/customerexcel}" class="btn btn-primary">EXCEL</a>
+              </div>
+            </form>
+            <table class="table table-bordered" id="datatablesSimple">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Date</th>
+                <th>Location</th>
+				 <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="customer : ${customers.content}">
+                <td th:text="${customer.id}">1</td>
+                <td th:text="${customer.name}">Sample Description</td>
+                <td th:text="${customer.phone}">$100</td>
+                <td th:text="${customer.date}">2023-11-01</td>
+                 <td th:text="${customer.location.name}"></td>
+				  <td>
+                  <a href="javascript:void(0)" class="btn btn-info btn-sm view-customer" th:data-id="${customer.id}">View</a>
+                  <a th:href="@{'/customers/edit/' + ${customer.id}}" class="btn btn-warning btn-sm">Edit</a>
+                  <a th:href="@{'/customer/delete/' + ${customer.id}}" class="btn btn-danger btn-sm"
+                     onclick="return confirm('Are you sure you want to delete this customer?');">Delete</a>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+
+            <nav aria-label="Page navigation example">
+              <ul class="pagination">
+                <!-- Previous Button -->
+                <li class="page-item" th:classappend="${customers.first} ? 'disabled'">
+                  <a class="page-link" th:href="@{'/customers?page=' + (${customers.number - 1}) + '&size=' + ${customers.size}}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+
+                <!-- Page Number Buttons -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, customers.totalPages - 1)}"
+                    th:classappend="${i == customers.number} ? 'active'">
+                  <a class="page-link" th:href="@{'/customers?page=' + ${i} + '&size=' + ${customers.size}}" th:text="${i + 1}">1</a>
+                </li>
+
+                <!-- Next Button -->
+                <li class="page-item" th:classappend="${customers.last} ? 'disabled'">
+                  <a class="page-link" th:href="@{'/customers?page=' + (${customers.number + 1}) + '&size=' + ${customers.size}}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+    <footer  th:replace="~{layouts/master :: footerelement}">
+
+    </footer>
+
+    <!-- Transaction Details Modal -->
+    <div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="customerModalLabel">Customer Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>ID:</strong> <span id="customerId"></span></p>
+            <p><strong>Name:</strong> <span id="customerName"></span></p>
+            <p><strong>Phone:</strong> <span id="customerPhone"></span></p>
+            <p><strong>Date:</strong> <span id="customerDate"></span></p>
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="js/scripts.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+   // Event handler for the "View" button
+   $('.view-customer').on('click', function () {
+     // Get the customer ID from the data-id attribute
+     var customerId = $(this).data('id');
+
+     // Perform AJAX request to fetch customer details
+     $.ajax({
+       url: '/customers/view/' + customerId, // URL with the correct ID
+       method: 'GET',
+       success: function (data) {
+         // Populate modal fields with customer data
+         $('#customerId').text(data.id);
+         $('#customerName').text(data.name);
+         $('#customerPhone').text(data.phone);
+         $('#customerDate').text(data.date);
+          
+
+         // Show the modal
+         $('#customerModal').modal('show');
+       },
+       error: function () {
+         console.error('Error fetching customer details');
+       }
+     });
+   });
+ });
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+<script src="js/datatables-simple-demo.js"></script>
+</body>
+</html>

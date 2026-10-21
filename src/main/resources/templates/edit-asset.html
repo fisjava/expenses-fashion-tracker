@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layouts/master :: headelement}">
+
+</head>
+<body class="sb-nav-fixed">
+<nav th:replace="~{layouts/master :: navelement}"></nav>
+
+<div id="layoutSidenav">
+    <div th:replace="~{layouts/master :: sidebarelement}"></div>
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Edit Asset</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a href="/">Assets</a></li>
+                    <li class="breadcrumb-item active">Edit Asset</li>
+                </ol>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="col-sm-8">
+                            <form th:action="@{'/assets/edit/' + ${asset.id}}" th:object="${asset}" method="post">
+                               
+								<!-- Name Field -->
+							<div class="form-group mb-3">
+						    <label for="name">Name</label>
+					        <input type="text" id="name" th:field="*{name}" class="form-control"   />
+						    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></div>
+						    </div>
+								
+							<!-- phone Field -->
+						   <div class="form-group mb-3">
+						   <label for="unit">Unit</label>
+						   <input type="text" id="unit" th:field="*{unit}" class="form-control"   />
+							<div th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}" class="text-danger"></div>
+						    </div>
+							
+
+							<!-- price Field -->
+							<div class="form-group mb-3">
+							<label for="prce">Price</label>
+							<input type="text" id="prce" th:field="*{prce}" class="form-control"   />
+							<div th:if="${#fields.hasErrors('prce')}" th:errors="*{prce}" class="text-danger"></div>
+							 </div>
+							 
+							 
+
+							 <!-- Quantities Field -->
+							 <div class="form-group mb-3">
+							 <label for="qtyy">Quantity</label>
+							 <input type="text" id="qtyy" th:field="*{qtyy}" class="form-control"   />
+							 <div th:if="${#fields.hasErrors('qtyy')}" th:errors="*{qtyy}" class="text-danger"></div>
+							  </div>
+
+                                <!-- Date Field -->
+                                <div class="form-group mb-3">
+                                    <label for="date">Date</label>
+                                    <input type="date" id="date" th:field="*{date}" class="form-control" />
+                                    <div th:if="${#fields.hasErrors('date')}" th:errors="*{date}" class="text-danger"></div>
+                                </div>
+
+
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-primary">Update Asset</button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{layouts/master :: footerelement}"></footer>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="/js/scripts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+<script src="/js/datatables-simple-demo.js"></script>
+</body>
+</html>
